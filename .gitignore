@@ -1,0 +1,5 @@
+.vault_pass
+*.retry
+group_vars/all/vault.yml.grupo
+group_vars/all/vault.yml
+group_vars/all/vault.yml

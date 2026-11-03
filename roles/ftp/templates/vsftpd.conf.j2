@@ -1,0 +1,34 @@
+listen=YES
+listen_ipv6=NO
+
+anonymous_enable={{ ftp_anonymous_enable }}
+local_enable={{ ftp_local_enable }}
+write_enable={{ ftp_write_enable }}
+
+chroot_local_user={{ ftp_chroot_local_user }}
+allow_writeable_chroot={{ ftp_allow_writeable_chroot }}
+
+local_root={{ ftp_local_root }}
+
+dirmessage_enable=YES
+use_localtime=YES
+xferlog_enable=YES
+connect_from_port_20=YES
+
+pam_service_name=vsftpd
+
+ssl_enable={{ ftp_ssl_enable }}
+rsa_cert_file={{ ftp_ssl_cert_file }}
+rsa_private_key_file={{ ftp_ssl_key_file }}
+
+force_local_logins_ssl={{ ftp_force_local_logins_ssl }}
+force_local_data_ssl={{ ftp_force_local_data_ssl }}
+
+ssl_tlsv1=YES
+ssl_sslv2=NO
+ssl_sslv3=NO
+require_ssl_reuse=NO
+
+pasv_enable={{ ftp_pasv_enable }}
+pasv_min_port={{ ftp_pasv_min_port }}
+pasv_max_port={{ ftp_pasv_max_port }}

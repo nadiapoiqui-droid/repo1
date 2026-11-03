@@ -1,0 +1,28 @@
+---
+ftp_package: vsftpd
+ftp_service: vsftpd
+
+ftp_anonymous_enable: "NO"
+ftp_local_enable: "YES"
+ftp_write_enable: "YES"
+
+ftp_chroot_local_user: "YES"
+ftp_allow_writeable_chroot: "YES"
+
+ftp_local_root: /srv/ftp
+
+ftp_ssl_enable: "YES"
+ftp_force_local_logins_ssl: "YES"
+ftp_force_local_data_ssl: "YES"
+
+ftp_ssl_cert_file: /etc/ssl/private/vsftpd.pem
+ftp_ssl_key_file: /etc/ssl/private/vsftpd.pem
+
+ftp_pasv_enable: "YES"
+ftp_pasv_min_port: 40000
+ftp_pasv_max_port: 40100
+
+ftp_user: ftpuser
+ftp_user_home: /srv/ftp
+ftp_user_group: ftpuser
+ftp_user_shell: /bin/bash

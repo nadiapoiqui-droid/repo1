@@ -1,0 +1,103 @@
+---
+- name: Instalar servidor FTP
+  community.general.zypper:
+    name: "{{ ftp_package }}"
+    state: present
+  tags: [ftp, packages]
+
+- name: Crear directorio principal FTP
+  ansible.builtin.file:
+    path: "{{ ftp_local_root }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  tags: [ftp]
+- name: Crear grupo FTP
+  ansible.builtin.group:
+    name: "{{ ftp_user_group }}"
+    state: present
+  tags: [ftp]
+
+- name: Crear usuario FTP
+  ansible.builtin.user:
+    name: "{{ ftp_user }}"
+    group: "{{ ftp_user_group }}"
+    home: "{{ ftp_user_home }}"
+    shell: "{{ ftp_user_shell }}"
+    create_home: false
+    password: "{{ vault_ftp_user_password | password_hash('sha512') }}"
+    state: present
+  tags: [ftp]
+
+- name: Crear directorio de archivos FTP
+  ansible.builtin.file:
+    path: "{{ ftp_user_home }}/archivos"
+    state: directory
+    owner: "{{ ftp_user }}"
+    group: "{{ ftp_user_group }}"
+    mode: "0750"
+  tags: [ftp]
+
+
+- name: Crear directorio para certificados FTP
+  ansible.builtin.file:
+    path: /etc/ssl/private
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  tags: [ftp]
+
+- name: Generar certificado TLS para FTP
+  ansible.builtin.command:
+    cmd: >-
+      openssl req -x509 -nodes -days 365 -newkey rsa:3072
+      -keyout /etc/ssl/private/vsftpd.pem
+      -out /etc/ssl/private/vsftpd.pem
+      -subj /CN=10.0.0.24
+      -addext subjectAltName=IP:10.0.0.24
+    creates: /etc/ssl/private/vsftpd.pem
+  tags: [ftp]
+
+- name: Proteger certificado TLS
+  ansible.builtin.file:
+    path: /etc/ssl/private/vsftpd.pem
+    owner: root
+    group: root
+    mode: "0600"
+  when: not ansible_check_mode
+  tags: [ftp]
+
+- name: Configurar vsftpd
+  ansible.builtin.template:
+    src: vsftpd.conf.j2
+    dest: /etc/vsftpd.conf
+    owner: root
+    group: root
+    mode: "0600"
+  notify: Reiniciar vsftpd
+  tags: [ftp]
+
+- name: Habilitar e iniciar servicio FTP
+  ansible.builtin.systemd:
+    name: "{{ ftp_service }}"
+    enabled: true
+    state: started
+  tags: [ftp]
+
+- name: Abrir servicio FTP en el firewall
+  ansible.posix.firewalld:
+    service: ftp
+    permanent: true
+    immediate: true
+    state: enabled
+  tags: [ftp]
+
+- name: Abrir rango de puertos pasivos FTP
+  ansible.posix.firewalld:
+    port: 40000-40100/tcp
+    permanent: true
+    immediate: true
+    state: enabled
+  tags: [ftp]
